@@ -25,6 +25,7 @@ def getCudaInfo():
     ctxCUDA = dev.make_context()
     devdata = DeviceData(dev)
     print ("Using device {0}: {1}".format( devNumber, dev.name() ))
+    
 
 def getKernelInfo(kernel,nthreads, rt=True):
     ''' This function returns info about kernels theoretical performance, but warning is not trivial to optimize! '''
