@@ -1,11 +1,11 @@
-__global__ void selection(unsigned long long int *parents, int ulonglongRequired, unsigned int *parentVals, unsigned long long int *blockBestParent, int islandSize, int max)
+__global__ void selection(unsigned long long int *parents, int ulonglongRequired,  int *parentVals, unsigned long long int *blockBestParent, int islandSize, int max)
 {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
     if (max > id)
     {
         int bId = id * islandSize;
-        unsigned int tmpLargestVal = 0;
-        unsigned int tmpLargestPar = 0;
+        int tmpLargestVal = 0;
+        int tmpLargestPar = 0;
         // iterate over the threads in an island
         for (int i = 0; i < islandSize; i++)
         {

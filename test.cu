@@ -2,8 +2,9 @@
  // one-bit and two-bit flip mutation
 __global__ void mutation(unsigned long long int *parents, int ulonglongRequired, float *mutateProb, int *mutateIndex, bool mode, bool isMutationKeep, int mutationThreshold, int max)
 {
-    int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
-    int mutateIndexId = mutateIndex[(blockIdx.x * blockDim.x + threadIdx.x)]/64+id;
+    int id = (blockIdx.x * blockDim.x + threadIdx.x);
+    int bid = id*ulonglongRequired;
+    int mutateIndexId = mutateIndex[(blockIdx.x * blockDim.x + threadIdx.x)]/64+bid;
     int mutateDigit =mutateIndex[(blockIdx.x * blockDim.x + threadIdx.x)]%64;
     if (max > id)
     {
@@ -19,6 +20,7 @@ __global__ void mutation(unsigned long long int *parents, int ulonglongRequired,
                 // if chromsome idth index is 1
                 parents[mutateIndexId] &= ~(1ULL << mutateDigit);
             }
+            parents[mutateIndexId]=11111;
         }
     }
 }
@@ -31,7 +33,6 @@ __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRe
         int bId = id * islandSize;
         int lowestIndex, highestIndex, highestVal = 0;
         int lowestVal = 2147483647;
-        ;
         for (int i = 0; i < islandSize; i++)
         {
             // store the chromsomes with the lowest and highest fitness values
@@ -82,29 +83,29 @@ __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRe
     }
 }
 
-__global__ void migration(unsigned long long int *parents, int ulonglongRequired, int islandSize , int max)
+__global__ void migration(unsigned long long int *parents, int ulonglongRequired, int islandSize , int parentsSize, int max)
 {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
     if (max > id)
     {
         // Migration - the last chromosome replaces the first chromosome of the next block
         int index = ((id + 1) * islandSize - 1)*ulonglongRequired;
-        if (index >= max)  index = index - max;
+        if (index >= parentsSize)  index = index - parentsSize;
         int replaceIndex = ((id + 1) * islandSize)*ulonglongRequired;
-        if (replaceIndex >= max)  replaceIndex = replaceIndex - max;
+        if (replaceIndex >= parentsSize)  replaceIndex = replaceIndex - parentsSize;
         for(int i =0; i < ulonglongRequired ; i++){
             parents[replaceIndex+i]=parents[index+i];
         }
     }
 }
-__global__ void selection(unsigned long long int *parents, int ulonglongRequired, unsigned int *parentVals, unsigned long long int *blockBestParent, int islandSize, int max)
+__global__ void selection(unsigned long long int *parents, int ulonglongRequired,  int *parentVals, unsigned long long int *blockBestParent, int islandSize, int max)
 {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
     if (max > id)
     {
         int bId = id * islandSize;
-        unsigned int tmpLargestVal = 0;
-        unsigned int tmpLargestPar = 0;
+        int tmpLargestVal = 0;
+        int tmpLargestPar = 0;
         // iterate over the threads in an island
         for (int i = 0; i < islandSize; i++)
         {
@@ -122,10 +123,10 @@ __global__ void selection(unsigned long long int *parents, int ulonglongRequired
 }
 
 
-__global__ void crossover(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int *length, int max)
+__global__ void crossover(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int *length, int islandSize, int max)
 {
     int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
-    int startingPosition = splitIndex[id] - length[id];
+    int startingPosition = splitIndex[id];
     if (startingPosition < 0)   startingPosition = 0;
     int startingBlock = 0;
     if (startingPosition != 0) startingBlock = startingPosition/64;
@@ -134,7 +135,7 @@ __global__ void crossover(unsigned long long int *parents, int ulonglongRequired
    
     if (max > id)
     {
-        int bId = blockIdx.x * ulonglongRequired;
+        int bId = (blockIdx.x * blockDim.x + threadIdx.x)/islandSize;
         for(int i = startingBlock; i< ulonglongRequired;i++ ){
             for (int ii = startingIndex; ii < 64; ii++)
             {

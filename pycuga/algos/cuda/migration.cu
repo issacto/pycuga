@@ -7,7 +7,6 @@ __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRe
         int bId = id * islandSize;
         int lowestIndex, highestIndex, highestVal = 0;
         int lowestVal = 2147483647;
-        ;
         for (int i = 0; i < islandSize; i++)
         {
             // store the chromsomes with the lowest and highest fitness values
@@ -58,16 +57,16 @@ __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRe
     }
 }
 
-__global__ void migration(unsigned long long int *parents, int ulonglongRequired, int islandSize , int max)
+__global__ void migration(unsigned long long int *parents, int ulonglongRequired, int islandSize , int parentsSize, int max)
 {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
     if (max > id)
     {
         // Migration - the last chromosome replaces the first chromosome of the next block
         int index = ((id + 1) * islandSize - 1)*ulonglongRequired;
-        if (index >= max)  index = index - max;
+        if (index >= parentsSize)  index = index - parentsSize;
         int replaceIndex = ((id + 1) * islandSize)*ulonglongRequired;
-        if (replaceIndex >= max)  replaceIndex = replaceIndex - max;
+        if (replaceIndex >= parentsSize)  replaceIndex = replaceIndex - parentsSize;
         for(int i =0; i < ulonglongRequired ; i++){
             parents[replaceIndex+i]=parents[index+i];
         }
