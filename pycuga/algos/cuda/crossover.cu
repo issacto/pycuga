@@ -2,7 +2,7 @@
 __global__ void crossover(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int *length, int islandSize, int max)
 {
     int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
-    int startingPosition = splitIndex[id];
+    int startingPosition = splitIndex[(blockIdx.x * blockDim.x + threadIdx.x)];
     if (startingPosition < 0)   startingPosition = 0;
     int startingBlock = 0;
     if (startingPosition != 0) startingBlock = startingPosition/64;

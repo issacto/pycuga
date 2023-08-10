@@ -2,8 +2,7 @@
 __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRequired, unsigned int *parentVals, int islandSize, int max)
 {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (max > id)
-    {
+    if(max>id){
         int bId = id * islandSize;
         int lowestIndex, highestIndex, highestVal = 0;
         int lowestVal = 2147483647;
@@ -60,8 +59,7 @@ __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRe
 __global__ void migration(unsigned long long int *parents, int ulonglongRequired, int islandSize , int parentsSize, int max)
 {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (max > id)
-    {
+    if(max>id){
         // Migration - the last chromosome replaces the first chromosome of the next block
         int index = ((id + 1) * islandSize - 1)*ulonglongRequired;
         if (index >= parentsSize)  index = index - parentsSize;

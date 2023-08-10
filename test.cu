@@ -1,35 +1,51 @@
  #include <cuda_runtime.h> 
- // one-bit and two-bit flip mutation
-__global__ void mutation(unsigned long long int *parents, int ulonglongRequired, float *mutateProb, int *mutateIndex, bool mode, bool isMutationKeep, int mutationThreshold, int max)
+ __global__ void evaluation(unsigned long long int *parents, int ulonglongRequired, int *chromosomesResults, int max)
 {
-    int id = (blockIdx.x * blockDim.x + threadIdx.x);
-    int bid = id*ulonglongRequired;
-    int mutateIndexId = mutateIndex[(blockIdx.x * blockDim.x + threadIdx.x)]/64+bid;
-    int mutateDigit =mutateIndex[(blockIdx.x * blockDim.x + threadIdx.x)]%64;
+    int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
+    if(max>id){
+        int tmpVar = 0;
+        for(int i = 0 ;i<ulonglongRequired;i++){
+            for(int ii =0; ii< 64;ii++){
+                if ((parents[id+i] >> ii) & 1)
+                {
+                    // if chromsome ith index is 0
+                    tmpVar+=1;
+                }
+            }
+        }
+        chromosomesResults[(blockIdx.x * blockDim.x + threadIdx.x)]=tmpVar;
+    }
+}
+
+;__global__ void mutation(unsigned long long int *parents, int ulonglongRequired, int *mutateIndex, int max)
+{
+    int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
     if (max > id)
     {
-         if (mutateProb[(blockIdx.x * blockDim.x + threadIdx.x)] > mutationThreshold)
-        {
-            if (!((parents[mutateIndexId] >> mutateDigit) & 1))
+
+        int mutateIndexId = mutateIndex[blockIdx.x * blockDim.x + threadIdx.x] / 64 +id;
+        int mutateDigit =  mutateIndex[blockIdx.x * blockDim.x + threadIdx.x] % 64;
+        // if(mutateIndexId<max  && mutateDigit<64 && mutateDigit>=0){
+            int tmpVar = parents[mutateIndexId];
+            if (!((tmpVar >> mutateDigit) & 1))
             {
-                // if chromsome idth index is 0
-                parents[mutateIndexId] |= (1ULL << mutateDigit);
+                tmpVar |= (1ULL << mutateDigit);
             }
             else
             {
                 // if chromsome idth index is 1
-                parents[mutateIndexId] &= ~(1ULL << mutateDigit);
+                tmpVar &= ~(1ULL << mutateDigit);
             }
-            parents[mutateIndexId]=11111;
-        }
+            parents[mutateIndexId]=  tmpVar;
+        // }
+
     }
 }
 
 __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRequired, unsigned int *parentVals, int islandSize, int max)
 {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (max > id)
-    {
+    if(max>id){
         int bId = id * islandSize;
         int lowestIndex, highestIndex, highestVal = 0;
         int lowestVal = 2147483647;
@@ -86,8 +102,7 @@ __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRe
 __global__ void migration(unsigned long long int *parents, int ulonglongRequired, int islandSize , int parentsSize, int max)
 {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
-    if (max > id)
-    {
+    if(max>id){
         // Migration - the last chromosome replaces the first chromosome of the next block
         int index = ((id + 1) * islandSize - 1)*ulonglongRequired;
         if (index >= parentsSize)  index = index - parentsSize;
@@ -126,7 +141,7 @@ __global__ void selection(unsigned long long int *parents, int ulonglongRequired
 __global__ void crossover(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int *length, int islandSize, int max)
 {
     int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
-    int startingPosition = splitIndex[id];
+    int startingPosition = splitIndex[(blockIdx.x * blockDim.x + threadIdx.x)];
     if (startingPosition < 0)   startingPosition = 0;
     int startingBlock = 0;
     if (startingPosition != 0) startingBlock = startingPosition/64;
