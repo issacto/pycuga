@@ -9,7 +9,7 @@
                 if ((parents[id+i] >> ii) & 1)
                 {
                     // if chromsome ith index is 0
-                    tmpVar+=1;
+                    tmpVar= tmpVar+1;
                 }
             }
         }
@@ -17,7 +17,7 @@
     }
 }
 
-;__global__ void mutation(unsigned long long int *parents, int ulonglongRequired, int *mutateIndex, int max)
+// chromosomesResults[(blockIdx.x * blockDim.x + threadIdx.x)]=1;__global__ void mutation(unsigned long long int *parents, int ulonglongRequired, int *mutateIndex, int max)
 {
     int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
     if (max > id)
@@ -73,9 +73,9 @@ __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRe
                 }
             }
         }
-        unsigned long long int tmpLowest[ULONGLONGREQUIREDVALUE];
-        unsigned long long int tmpHighest[ULONGLONGREQUIREDVALUE];
-        //TODO
+        unsigned long long int tmpLowest[TO-BE-REPLACED-ulonglongRequired];
+        unsigned long long int tmpHighest[TO-BE-REPLACED-ulonglongRequired];
+        //Swap Position
         for(int i =0; i < ulonglongRequired ; i++){
             tmpLowest[i]=parents[lowestIndex*ulonglongRequired+i];
         }

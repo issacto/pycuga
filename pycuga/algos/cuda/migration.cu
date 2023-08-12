@@ -30,9 +30,9 @@ __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRe
                 }
             }
         }
-        unsigned long long int tmpLowest[ULONGLONGREQUIREDVALUE];
-        unsigned long long int tmpHighest[ULONGLONGREQUIREDVALUE];
-        //TODO
+        unsigned long long int tmpLowest[TO-BE-REPLACED-ulonglongRequired];
+        unsigned long long int tmpHighest[TO-BE-REPLACED-ulonglongRequired];
+        //Swap Position
         for(int i =0; i < ulonglongRequired ; i++){
             tmpLowest[i]=parents[lowestIndex*ulonglongRequired+i];
         }

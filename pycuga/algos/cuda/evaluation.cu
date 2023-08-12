@@ -17,3 +17,4 @@ __global__ void evaluation(unsigned long long int *parents, int ulonglongRequire
 }
 
 // chromosomesResults[(blockIdx.x * blockDim.x + threadIdx.x)]=1;
+

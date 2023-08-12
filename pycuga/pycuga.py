@@ -29,7 +29,7 @@ class PyCUGA:
         # cudaCode = tools.read_files_as_strings()
         cudaCode = cudaCodeConst
 
-        mod = SourceModule((cudaCode+evaluationString).replace("ULONGLONGREQUIREDVALUE", str(self.ulonglongRequired)))
+        mod = SourceModule((cudaCode+evaluationString).replace("TO-BE-REPLACED-ulonglongRequired", str(self.ulonglongRequired)))
 
         self.crossover = mod.get_function("crossover")
         self.mutation = mod.get_function("mutation")
@@ -41,10 +41,9 @@ class PyCUGA:
     def launchKernel(self, islandSize, blockSize, chromosomeNo, migrationRounds, rounds):
         parentsGridSize = int((chromosomeNo+blockSize-1)//blockSize)
         islandGridSize = int((chromosomeNo/islandSize+blockSize-1)//blockSize)
-        maxChromosomeSize = chromosomeNo*self.ulonglongRequired
-        maxIslandSize = int(chromosomeNo//islandSize)
-        bestChromsomeSize = int(chromosomeNo/islandSize)
-         #################################
+        maxChromosomeThread = chromosomeNo*self.ulonglongRequired
+        maxIslandThread = int(chromosomeNo//islandSize)
+        #################################
         # Print Variables #
         #################################
         print("Block Size: " ,blockSize )
@@ -55,20 +54,19 @@ class PyCUGA:
         #################################
         # Declare Arrays #
         #################################
-        # chromosomes = np.random.randint(0, np.iinfo(np.uint64).max, size=maxChromosomeSize, dtype=np.uint64)
-        # chromosomes_gpu = cuda.mem_alloc(maxChromosomeSize*(chromosomes.dtype.itemsize))
+        # chromosomes = np.random.randint(0, np.iinfo(np.uint64).max, size=maxChromosomeThread, dtype=np.uint64)
+        # chromosomes_gpu = cuda.mem_alloc(maxChromosomeThread*(chromosomes.dtype.itemsize))
         # drv.memcpy_htod(chromosomes_gpu, chromosomes)
 
-        chromosomes = np.random.randint(0, np.iinfo(np.uint64).max, size=maxChromosomeSize, dtype=np.uint64)
+        chromosomes = np.random.randint(0, np.iinfo(np.uint64).max, size=maxChromosomeThread, dtype=np.uint64)
         chromosomes_gpu = gpuarray.to_gpu(chromosomes)
 
         chromosomesResults= np.random.randint(0, 20, size=chromosomeNo).astype(np.int32)
         chromosomesResults_gpu = gpuarray.to_gpu(chromosomesResults)
-        print("chromosomesResults_gpu")
-        print(chromosomesResults_gpu)
-        print("<<<results Evaluation Zero Evaluation>>> : ", (gpuarray.max(chromosomesResults_gpu)).get())
+        # print("chromosomesResults_gpu")
+        # print(chromosomesResults_gpu)
 
-        islandBestChromosomes= np.random.randint(0, np.iinfo(np.uint64).max, size=maxIslandSize, dtype=np.uint64)
+        islandBestChromosomes= np.random.randint(0, np.iinfo(np.uint64).max, size=maxIslandThread, dtype=np.uint64)
         islandBestChromosomes_gpu = gpuarray.to_gpu(islandBestChromosomes)
 
 
@@ -81,11 +79,11 @@ class PyCUGA:
             # Migration #
             ##################################
             if(roundCount%migrationRounds==0 and roundCount!=0):
-                print("MIGRATION")
-                self.internalReOrder(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, np.int32(islandSize) , np.int32(maxIslandSize), block=(blockSize, 1, 1), grid=(islandGridSize, 1))
-                self.evaluation(chromosomes_gpu,  np.int32(self.ulonglongRequired), chromosomesResults_gpu, np.int32(maxChromosomeSize), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
-                print("<<<results>>> : ", (gpuarray.max(chromosomesResults_gpu)).get())
-                self.migration(chromosomes_gpu,np.int32(self.ulonglongRequired), np.int32(islandSize), np.int32(maxChromosomeSize) , np.int32(maxIslandSize),  block=(blockSize, 1, 1), grid=(islandGridSize, 1))
+                # print("MIGRATION")
+                self.internalReOrder(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, np.int32(islandSize) , np.int32(maxIslandThread), block=(blockSize, 1, 1), grid=(islandGridSize, 1))
+                self.evaluation(chromosomes_gpu,  np.int32(self.ulonglongRequired), chromosomesResults_gpu, np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
+                # print("<<<results>>> : ", (gpuarray.max(chromosomesResults_gpu)).get())
+                self.migration(chromosomes_gpu,np.int32(self.ulonglongRequired), np.int32(islandSize), np.int32(maxChromosomeThread) , np.int32(maxIslandThread),  block=(blockSize, 1, 1), grid=(islandGridSize, 1))
 
 
             ##################################
@@ -107,16 +105,19 @@ class PyCUGA:
             ##################################
             
             print("evaluation")
-            self.evaluation(chromosomes_gpu,  np.int32(self.ulonglongRequired), chromosomesResults_gpu, np.int32(maxChromosomeSize), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
+            self.evaluation(chromosomes_gpu,  np.int32(self.ulonglongRequired), chromosomesResults_gpu, np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
             # print("<<<results Evaluation First Evaluation>>> : ", (gpuarray.max(chromosomesResults_gpu)).get())
+            
             print("selection")
-            self.selection(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, islandBestChromosomes_gpu,  np.int32(islandSize), np.int32(maxIslandSize), block=(blockSize, 1, 1), grid=(islandGridSize, 1))
+            self.selection(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, islandBestChromosomes_gpu,  np.int32(islandSize), np.int32(maxIslandThread), block=(blockSize, 1, 1), grid=(islandGridSize, 1))
+            
             print("crossover")
-            self.crossover(chromosomes_gpu, np.int32(self.ulonglongRequired), islandBestChromosomes_gpu, random_crossover_index_gpu, random_crossover_length_gpu, np.int32(islandSize) ,np.int32(maxChromosomeSize), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
+            self.crossover(chromosomes_gpu, np.int32(self.ulonglongRequired), islandBestChromosomes_gpu, random_crossover_index_gpu, random_crossover_length_gpu, np.int32(islandSize) ,np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
+            
+            print("mutation")
             random_mutation_index_cpu = np.random.randint(0, self.chromosomeSize, size=chromosomeNo).astype(np.int32)
             random_mutation_index_gpu = gpuarray.to_gpu(random_mutation_index_cpu)
-            print("mutation")
-            self.mutation(chromosomes_gpu, np.int32(self.ulonglongRequired), random_mutation_index_gpu, np.int32(maxChromosomeSize), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
+            self.mutation(chromosomes_gpu, np.int32(self.ulonglongRequired), random_mutation_index_gpu, np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
             
 
             ##################################
@@ -125,7 +126,7 @@ class PyCUGA:
             ##################################
             # print("IMPORTANT INFORMATION")
             # print("self.ulonglongRequired",self.ulonglongRequired)
-            # print("maxChromosomeSize",maxChromosomeSize)
+            # print("maxChromosomeThread",maxChromosomeThread)
             # print("blockSize",blockSize)
             # print("parentsGridSize",parentsGridSize)
             # print("chromosomes_gpu",chromosomes_gpu.size)
@@ -140,7 +141,7 @@ class PyCUGA:
             ##################################
             # print result
             ##################################
-            self.evaluation(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, np.int32(maxChromosomeSize), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))            
+            self.evaluation(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))            
 
             chromosomes = chromosomes_gpu.get()
             chromosomesResults = chromosomesResults_gpu.get()
