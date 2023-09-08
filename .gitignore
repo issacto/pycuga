@@ -51,3 +51,8 @@ docs/_build/
 
 
 .pypirc
+
+
+tools.js
+test.cu
+test.py

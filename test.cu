@@ -1,5 +1,9 @@
- #include <cuda_runtime.h> 
- __global__ void evaluation(unsigned long long int *parents, int ulonglongRequired, int *chromosomesResults, int max)
+
+#include <cuda_runtime.h> 
+__constant__ short d_problemSets[30000];
+__constant__ short d_problemSetsSize;
+
+__global__ void evaluation(unsigned long long int *parents, int ulonglongRequired, int *chromosomesResults, int max)
 {
     int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
     if(max>id){
@@ -17,7 +21,10 @@
     }
 }
 
-// chromosomesResults[(blockIdx.x * blockDim.x + threadIdx.x)]=1;__global__ void mutation(unsigned long long int *parents, int ulonglongRequired, int *mutateIndex, int max)
+// chromosomesResults[(blockIdx.x * blockDim.x + threadIdx.x)]=1;
+
+
+__global__ void mutation(unsigned long long int *parents, int ulonglongRequired, int *mutateIndex, int max)
 {
     int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
     if (max > id)
@@ -41,6 +48,7 @@
 
     }
 }
+
 
 __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRequired, unsigned int *parentVals, int islandSize, int max)
 {
@@ -113,6 +121,7 @@ __global__ void migration(unsigned long long int *parents, int ulonglongRequired
         }
     }
 }
+
 __global__ void selection(unsigned long long int *parents, int ulonglongRequired,  int *parentVals, unsigned long long int *blockBestParent, int islandSize, int max)
 {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -136,6 +145,7 @@ __global__ void selection(unsigned long long int *parents, int ulonglongRequired
         }
     }
 }
+
 
 
 __global__ void crossover(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int *length, int islandSize, int max)
@@ -209,3 +219,4 @@ __global__ void crossover_uniform(unsigned long long int *parents, int ulonglong
         }
     }
 }
+

@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="issacto",
-    version="0.0.1",
+    name="pycuga",
+    version="0.0.11",
     author="Issac To",
     description="Python Cuda Genetic Algorithm Package",
     long_description=long_description,
@@ -20,6 +20,7 @@ setuptools.setup(
     install_requires=[         
         'pandas',         
         'numpy',
+        'pycuda',
         'matplotlib',
     ],
 )
