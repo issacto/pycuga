@@ -21,7 +21,6 @@ class PyCUGA:
     def __init__(self, mutationThreshold, isTime, time, constArr, chromosomeSize, stringPlaceholder):
         self.isTime = isTime
         self.time = time
-        self.constArr=constArr
         self.dev = drv.Device(0)
         self.ctx = self.dev.make_context()
         self.ulonglongRequired = math.ceil(chromosomeSize/64)
@@ -44,7 +43,10 @@ class PyCUGA:
         # try
         self.constantArray = gpuarray.to_gpu(constArr)
         self.constantArraySize = self.constantArray.size
-        print("np.int32(np.int32(np.int32(self.constantArraySize)))", np.int32(self.constantArraySize))
+        # print("np.int32(np.int32(np.int32(self.constantArraySize)))", np.int32(self.constantArraySize))
+        print("self.constantArray",self.constantArray)
+        print("self.constantArraySize",self.constantArraySize)
+
 
     def launchKernel(self, islandSize, blockSize, chromosomeNo, migrationRounds, rounds, isDebug = False):
         parentsGridSize = int((chromosomeNo+blockSize-1)//blockSize)
@@ -82,12 +84,13 @@ class PyCUGA:
         maxVal = 0
         maxChromosome =""
         while (self.isTime) or (not self.isTime and roundCount<rounds):
-            print("Round - ", roundCount)
+            print("Round - ", roundCount, maxVal, maxChromosome)
             ##################################
             # Migration #
             ##################################
             if(roundCount%migrationRounds==0 and roundCount!=0):
-                # print("MIGRATION")
+                if(isDebug):
+                    print("MIGRATION")
                 self.internalReOrder(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, np.int32(islandSize) , np.int32(maxIslandThread), block=(blockSize, 1, 1), grid=(islandGridSize, 1))
                 self.evaluation(chromosomes_gpu,  np.int32(self.ulonglongRequired), chromosomesResults_gpu, self.constantArray, np.int32(self.constantArraySize), np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
 
@@ -133,8 +136,22 @@ class PyCUGA:
             
             random_mutation_index_cpu = np.random.randint(0, self.chromosomeSize, size=chromosomeNo).astype(np.int32)
             random_mutation_index_gpu = gpuarray.to_gpu(random_mutation_index_cpu)
+            if(isDebug):
+                print("random_mutation_index_gpu", random_mutation_index_gpu)
             self.mutation(chromosomes_gpu, np.int32(self.ulonglongRequired), random_mutation_index_gpu, np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
             
+
+            
+            
+            
+            ##################################
+            # print result
+            ##################################
+            self.evaluation(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, self.constantArray, np.int32(self.constantArraySize), np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))            
+
+            chromosomes = chromosomes_gpu.get()
+            chromosomesResults = chromosomesResults_gpu.get()
+
 
             ##################################
             ##################################
@@ -145,22 +162,17 @@ class PyCUGA:
             # print("maxChromosomeThread",maxChromosomeThread)
             # print("blockSize",blockSize)
             # print("parentsGridSize",parentsGridSize)
-            # print("chromosomes_gpu",chromosomes_gpu.size)
+            # print("chromosomes_gpuSize",chromosomes_gpu.size)
+            # print("chromosomes_gpu",chromosomes_gpu)
             # print("self.chromosomeSize",self.chromosomeSize)
-            # print("random_mutation_index_gpu",random_mutation_index_gpu.size)
+            # print("random_mutation_index_gpu",random_mutation_index_gpu)
             # print("random_mutation_index_gpu max",np.max(random_mutation_index_gpu.get()))
             # print("random_mutation_index_gpu minimum",np.min(random_mutation_index_gpu.get()))
+            # print("chromosomes_gpu[0:50]",chromosomes_gpu[0:50])
+            # print("chromosomesResults[0:50]",chromosomesResults[0:50])
             ##################################
             ##################################
-            
-            
-            ##################################
-            # print result
-            ##################################
-            self.evaluation(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, self.constantArray, np.int32(self.constantArraySize), np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))            
 
-            chromosomes = chromosomes_gpu.get()
-            chromosomesResults = chromosomesResults_gpu.get()
             # print(chromosomesResults)
             # print("<<<results>>> : ", (gpuarray.max(chromosomesResults_gpu)).get())
 
