@@ -18,14 +18,19 @@ import os
 
 
 class PyCUGA:
-    def __init__(self, mutationThreshold, isTime, time, constArr, chromosomeSize, stringPlaceholder):
+    def __init__(self, isTime, time, constArr, chromosomeSize, stringPlaceholder, mutationNumber, crossoverMode):
         self.isTime = isTime
         self.time = time
         self.dev = drv.Device(0)
         self.ctx = self.dev.make_context()
         self.ulonglongRequired = math.ceil(chromosomeSize/64)
         self.chromosomeSize=chromosomeSize
-        self.mutationThreshold = mutationThreshold
+        self.mutationNumber = mutationNumber
+        self.crossoverMode= crossoverMode
+
+        num_devices = cuda.Device.count()
+        print("num_devices", num_devices)
+
         # declare global CUDA functions
         
         # +"/pycuga/algos/cuda/"
@@ -33,8 +38,9 @@ class PyCUGA:
         # cudaCode = read_files_as_strings_manual()
         # mod = SourceModule((libraryCode+stringPlaceholder+cudaCode).replace("TO-BE-REPLACED-ulonglongRequired", str(self.ulonglongRequired)))
         mod = SourceModule((cudaCode+stringPlaceholder).replace("TO-BE-REPLACED-ulonglongRequired", str(self.ulonglongRequired)))
-
-        self.crossover = mod.get_function("crossover")
+        print("ITS Crossover", crossoverMode)
+        self.crossover = mod.get_function(crossoverMode)
+        print("No, it is not Crossover")
         self.mutation = mod.get_function("mutation")
         self.selection = mod.get_function("selection")
         self.evaluation = mod.get_function("evaluation")
@@ -126,19 +132,31 @@ class PyCUGA:
                 print("selection")
             self.selection(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, islandBestChromosomes_gpu,  np.int32(islandSize), np.int32(maxIslandThread), block=(blockSize, 1, 1), grid=(islandGridSize, 1))
             
+
+            ##################################
+            # Crossover #
+            ##################################
             if(isDebug):
                 print("crossover")
-            self.crossover(chromosomes_gpu, np.int32(self.ulonglongRequired), islandBestChromosomes_gpu, random_crossover_index_gpu, random_crossover_length_gpu, np.int32(islandSize) ,np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
             
+            if(self.crossoverMode=="crossover_double"):
+                self.crossover(chromosomes_gpu, np.int32(self.ulonglongRequired), islandBestChromosomes_gpu, random_crossover_index_gpu, random_crossover_length_gpu,  np.int32(islandSize) ,np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
+            else:
+                self.crossover(chromosomes_gpu, np.int32(self.ulonglongRequired), islandBestChromosomes_gpu, random_crossover_index_gpu, np.int32(islandSize) ,np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))    
+            
+            
+            
+            ##################################
+            # Mutation #
+            ##################################
             if(isDebug):
                 print("mutation")
-
             
             random_mutation_index_cpu = np.random.randint(0, self.chromosomeSize, size=chromosomeNo).astype(np.int32)
             random_mutation_index_gpu = gpuarray.to_gpu(random_mutation_index_cpu)
             if(isDebug):
                 print("random_mutation_index_gpu", random_mutation_index_gpu)
-            self.mutation(chromosomes_gpu, np.int32(self.ulonglongRequired), random_mutation_index_gpu, np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
+            self.mutation(chromosomes_gpu, np.int32(self.ulonglongRequired), random_mutation_index_gpu, np.int32(self.mutationNumber) ,np.int32(chromosomeNo), np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
             
 
             
@@ -187,6 +205,8 @@ class PyCUGA:
                     maxChromosome+=str(chromosomes[resultIndex*self.ulonglongRequired+i])
                     maxChromosome+=" "
 
+        # TODO: TEST
+        self.ctx.pop()
 
         ##################################
         # print result

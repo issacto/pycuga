@@ -56,3 +56,6 @@ docs/_build/
 tools.js
 test.cu
 test.py
+
+.vscode
+.vscode/

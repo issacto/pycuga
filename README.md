@@ -1,4 +1,4 @@
-## PYthon CUda Genetic Algorith
+## PYthon CUda Genetic Algorithm
 
 PyCuGa provides a simple and easy package for performing island-based genetic algorithm using Python and Cuda. 
 
@@ -6,9 +6,14 @@ PyCuGa provides a simple and easy package for performing island-based genetic al
 
 | Method  |  |
 | ------------- |:-------------:|
-| Selection     | Elitism, Roulette Wheel     |
-| Crossover     | Single, Double fixed     |
+| Selection     | Elitism |
+| Crossover     | Single, Double |
 | Mutation      | Number     |
+
+
+```
+pip install pycuga
+```
 
 ```python
 p1 = PyCUGA( mutationThreshold = 0.1, isTime = False, time = 0, constArr = "", chromosomeSize = 18432, evaluationString = "")

@@ -3,36 +3,62 @@
 __constant__ short d_problemSets[30000];
 __constant__ short d_problemSetsSize;
 
-__global__ void evaluation(unsigned long long int *parents, int ulonglongRequired, int *chromosomesResults, int max)
-{
-    int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
-    if(max>id){
-        int tmpVar = 0;
-        for(int i = 0 ;i<ulonglongRequired;i++){
-            for(int ii =0; ii< 64;ii++){
-                if ((parents[id+i] >> ii) & 1)
-                {
-                    // if chromsome ith index is 0
-                    tmpVar= tmpVar+1;
-                }
-            }
-        }
-        chromosomesResults[(blockIdx.x * blockDim.x + threadIdx.x)]=tmpVar;
-    }
-}
+// __global__ void evaluation(unsigned long long int *parents, int ulonglongRequired, int *chromosomesResults, int max)
+// {
+//     int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
+//     if(max>id){
+//         int tmpVar = 0;
+//         for(int i = 0 ;i<ulonglongRequired;i++){
+//             for(int ii =0; ii< 64;ii++){
+//                 if ((parents[id+i] >> ii) & 1)
+//                 {
+//                     // if chromsome ith index is 0
+//                     tmpVar= tmpVar+1;
+//                 }
+//             }
+//         }
+//         chromosomesResults[(blockIdx.x * blockDim.x + threadIdx.x)]=tmpVar;
+//     }
+// }
 
 // chromosomesResults[(blockIdx.x * blockDim.x + threadIdx.x)]=1;
 
 
-__global__ void mutation(unsigned long long int *parents, int ulonglongRequired, int *mutateIndex, int max)
+// __global__ void mutation(unsigned long long int *parents, int ulonglongRequired, int *mutateIndex, int max)
+// {
+//     int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
+//     if (max > id)
+//     {
+
+//         int mutateIndexId = mutateIndex[blockIdx.x * blockDim.x + threadIdx.x] / 64 +id;
+//         int mutateDigit =  mutateIndex[blockIdx.x * blockDim.x + threadIdx.x] % 64;
+//         // if(mutateIndexId<max  && mutateDigit<64 && mutateDigit>=0){
+//             int tmpVar = parents[mutateIndexId];
+//             if (!((tmpVar >> mutateDigit) & 1))
+//             {
+//                 tmpVar |= (1ULL << mutateDigit);
+//             }
+//             else
+//             {
+//                 // if chromsome idth index is 1
+//                 tmpVar &= ~(1ULL << mutateDigit);
+//             }
+//             parents[mutateIndexId]=  tmpVar;
+//         // }
+
+//     }
+// }
+
+
+__global__ void mutation(unsigned long long int *parents, int ulonglongRequired, int *mutateIndex, int mutateVal, int chromosomeNo, int max)
 {
     int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
     if (max > id)
     {
-
-        int mutateIndexId = mutateIndex[blockIdx.x * blockDim.x + threadIdx.x] / 64 +id;
-        int mutateDigit =  mutateIndex[blockIdx.x * blockDim.x + threadIdx.x] % 64;
-        // if(mutateIndexId<max  && mutateDigit<64 && mutateDigit>=0){
+        for(int i =0;i<mutateVal;i++){
+            int index =(blockIdx.x * blockDim.x + threadIdx.x+i)%chromosomeNo;
+            int mutateIndexId = mutateIndex[index] / 64 +id;
+            int mutateDigit =  mutateIndex[index] % 64; 
             int tmpVar = parents[mutateIndexId];
             if (!((tmpVar >> mutateDigit) & 1))
             {
@@ -44,7 +70,7 @@ __global__ void mutation(unsigned long long int *parents, int ulonglongRequired,
                 tmpVar &= ~(1ULL << mutateDigit);
             }
             parents[mutateIndexId]=  tmpVar;
-        // }
+        }
 
     }
 }
@@ -148,7 +174,7 @@ __global__ void selection(unsigned long long int *parents, int ulonglongRequired
 
 
 
-__global__ void crossover(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int *length, int islandSize, int max)
+__global__ void crossover_single(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int islandSize, int max)
 {
     int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
     int startingPosition = splitIndex[(blockIdx.x * blockDim.x + threadIdx.x)];
@@ -163,6 +189,51 @@ __global__ void crossover(unsigned long long int *parents, int ulonglongRequired
         int bId = (blockIdx.x * blockDim.x + threadIdx.x)/islandSize;
         for(int i = startingBlock; i< ulonglongRequired;i++ ){
             for (int ii = startingIndex; ii < 64; ii++)
+            {
+                if ((blockBestParents[bId+i] >> ii) & 1)
+                {
+                    // if selected chromsome ith index is 1
+                    if (!((parents[id+i] >> ii) & 1))
+                    {
+                        // if chromsome ith index is 0
+                        parents[id+i] |= (1ULL << ii);
+                    }
+                }
+                else
+                {
+                    // if selected chromsome ith index is 0
+                    if ((parents[id+i] >> ii) & 1)
+                    {
+                        // if chromsome ith index is 1
+                        parents[id+i] &= ~(1ULL << ii);
+                    }
+                }
+            }
+        }
+        startingIndex =0;
+    }
+}
+
+__global__ void crossover_double(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int *length, int islandSize, int max)
+{
+    int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
+    int startingPosition = splitIndex[(blockIdx.x * blockDim.x + threadIdx.x)];
+    if (startingPosition < 0)   startingPosition = 0;
+    int startingBlock = 0;
+    if (startingPosition != 0) startingBlock = startingPosition/64;
+    int startingIndex = startingPosition%64;
+    int endingBlock =(startingPosition+length[(blockIdx.x * blockDim.x + threadIdx.x)])/64+1;
+    int endingIndex = (startingPosition+length[(blockIdx.x * blockDim.x + threadIdx.x)])%64+1;
+    if((startingPosition+length[(blockIdx.x * blockDim.x + threadIdx.x)])>ulonglongRequired*64){
+        endingBlock=ulonglongRequired;
+        endingIndex = 64;
+    }
+   
+    if (max > id)
+    {
+        int bId = (blockIdx.x * blockDim.x + threadIdx.x)/islandSize;
+        for(int i = startingBlock; i< endingBlock;i++ ){
+            for (int ii = startingIndex; ii < endingIndex; ii++)
             {
                 if ((blockBestParents[bId+i] >> ii) & 1)
                 {
