@@ -57,5 +57,7 @@ tools.js
 test.cu
 test.py
 
-.vscode
-.vscode/
+./.vscode
+./.vscode/
+
+test.cu
