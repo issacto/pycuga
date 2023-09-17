@@ -30,7 +30,7 @@ stringPlaceholder="""
         int i = 0;
         while(i<constantArraySize){
             bool tmptmpVar = false;
-            for(int ii = 0 ;ii<3;ii++){
+            for(int ii = 0 ;ii<satSize;ii++){
                 int constantArrayIndex = i+ii;
                 int constantArrayAbsNumber = constantArray[constantArrayIndex]; 
                 if(constantArrayAbsNumber<0){
@@ -55,7 +55,7 @@ stringPlaceholder="""
             if(tmptmpVar){
                 tmpVar+=1;
             }
-            i+=3;
+            i+=satSize;
         }
         chromosomesResults[(blockIdx.x * blockDim.x + threadIdx.x)]=tmpVar;
     }

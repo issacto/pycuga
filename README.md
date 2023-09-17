@@ -4,7 +4,7 @@ PyCuGa provides a simple and easy package for performing island-based genetic al
 
 ## Variables
 
-| Method  |  |
+| Methods currently supported |  |
 | ------------- |:-------------:|
 | Selection     | Elitism |
 | Crossover     | Single, Double |
@@ -21,8 +21,10 @@ p1. launchKernel(islandSize = 32, blockSize = 128, chromosomeNo = 18432, migrati
 
 ```
 
-Use multiples of 32 to avoid bugs and increase efficiency.
+## Limitations
+* Use multiples of 32 (for chromosome parameters)to avoid bugs and increase efficiency.
+* Island migration is limited to 1 currently
 
-Disclaimer
-This is a project that 
 
+## Disclaimer
+This is a mini project which I've put a lot of time and effort into, but I can't take responsibility for any hiccups, glitches, or other unexpected things that might happen during execution.

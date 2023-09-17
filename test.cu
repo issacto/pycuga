@@ -75,7 +75,6 @@ __global__ void mutation(unsigned long long int *parents, int ulonglongRequired,
     }
 }
 
-
 __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRequired, unsigned int *parentVals, int islandSize, int max)
 {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -171,8 +170,6 @@ __global__ void selection(unsigned long long int *parents, int ulonglongRequired
         }
     }
 }
-
-
 
 __global__ void crossover_single(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int islandSize, int max)
 {
