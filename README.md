@@ -20,7 +20,7 @@ Pycuga (PYthon CUda Genetic Algorithm) provides a simple and easy package for pe
 pip install pycuga
 ```
 
-Look at samples for more information.
+[Samples](https://github.com/issacto/PyCuGa/tree/main/samples) for more information.
 
 
 ### Limitations
