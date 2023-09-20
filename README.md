@@ -3,7 +3,7 @@
 Pycuga (PYthon CUda Genetic Algorithm) provides a simple and easy package for performing island-based genetic algorithm using Python and Cuda.
 
 ### Motivation
-- When I worked on my prrevious project on Solving Maximum Satisfiability Problem using CUDA, I realised a lot of code could be reused and save a lot of development time for solving other optimisation problem using genetic algorithm and CUDA. 
+- When I worked on my previous project on [Solving Maximum Satisfiability Problem using CUDA](https://github.com/issacto/cuda-maxsat), I realised a lot of code could be reused and save a lot of development time for solving other optimisation problem using genetic algorithm and CUDA. 
 
 
 ### Parameters
