@@ -1,6 +1,6 @@
-# 📦PYthon CUda Genetic Algorithm - PYCUGA
+# 📦PYCUGA
 
-PyCuGa provides a simple and easy package for performing island-based genetic algorithm using Python and Cuda.
+PyCuGa (PYthon CUda Genetic Algorithm) provides a simple and easy package for performing island-based genetic algorithm using Python and Cuda.
 
 
 ## Variables
@@ -8,7 +8,7 @@ PyCuGa provides a simple and easy package for performing island-based genetic al
 | Methods currently supported |  |
 | ------------- |:-------------:|
 | Selection     | Elitism |
-| Crossover     | Single, Double |
+| Crossover     | Single, Double, Uniform |
 | Mutation      | Number     |
 
 
@@ -23,7 +23,7 @@ p1. launchKernel(islandSize = 32, blockSize = 128, chromosomeNo = 18432, migrati
 ```
 
 ## Limitations
-* Use multiples of 32 (for chromosome parameters)to avoid bugs and increase efficiency.
+* Use multiples of 32 (for chromosome parameters) to avoid bugs and increase efficiency.
 * Island migration is limited to 1 item currently
 * Lack unit testing
 

@@ -184,7 +184,7 @@ class PyCUGA:
         self.ctx.pop()
 
         ##################################
-        # print result
+        # Print result
         ##################################
         print("Maximum value")
         print(maxVal)
