@@ -18,7 +18,7 @@ import os
 
 
 class PyCUGA:
-    def __init__(self, isTime, time, constArr, chromosomeSize, stringPlaceholder, mutationNumber, crossoverMode):
+    def __init__(self, isTime, time, constArr, chromosomeSize, stringPlaceholder, mutationNumber, selectionMode, crossoverMode):
         self.isTime = isTime
         self.time = time
         self.dev = drv.Device(0)
@@ -27,6 +27,7 @@ class PyCUGA:
         self.chromosomeSize=chromosomeSize
         self.mutationNumber = mutationNumber
         self.crossoverMode= crossoverMode
+        self.selectionMode = selectionMode
 
         num_devices = cuda.Device.count()
         print("num_devices", num_devices)
@@ -38,7 +39,8 @@ class PyCUGA:
         mod = SourceModule((cudaCode+stringPlaceholder).replace("TO-BE-REPLACED-ulonglongRequired", str(self.ulonglongRequired)))
         self.crossover = mod.get_function(crossoverMode)
         self.mutation = mod.get_function("mutation")
-        self.selection = mod.get_function("selection")
+        self.selection_elitism = mod.get_function("selection_elitism")
+        self.selection_roulettewheel = mod.get_function("selection_roulettewheel")
         self.evaluation = mod.get_function("evaluation")
         self.internalReOrder = mod.get_function("internalReOrder")
         self.migration = mod.get_function("migration")
@@ -110,9 +112,19 @@ class PyCUGA:
                 print("evaluation")
             self.evaluation(chromosomes_gpu,  np.int32(self.ulonglongRequired), chromosomesResults_gpu, self.constantArray, np.int32(self.constantArraySize), np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
             
+
+            ##################################
+            # Selection #
+            ##################################
+
             if(isDebug):
                 print("selection")
-            self.selection(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, islandBestChromosomes_gpu,  np.int32(islandSize), np.int32(maxIslandThread), block=(blockSize, 1, 1), grid=(islandGridSize, 1))
+            if(self.selectionMode=="selection_elitism"):
+                self.selection_elitism(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, islandBestChromosomes_gpu,  np.int32(islandSize), np.int32(maxIslandThread), block=(blockSize, 1, 1), grid=(islandGridSize, 1))
+            elif(self.selectionMode=="selection_roulettewheel"):
+                random_selection_probs_cpu = np.random.rand(maxIslandThread).astype(np.float32)
+                random_selection_probs_gpu = gpuarray.to_gpu(random_selection_probs_cpu)
+                self.selection_roulettewheel(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, islandBestChromosomes_gpu, random_selection_probs_gpu, np.int32(islandSize), np.int32(maxIslandThread), block=(blockSize, 1, 1), grid=(islandGridSize, 1))
             
 
             ##################################
@@ -126,6 +138,7 @@ class PyCUGA:
             else:
                 self.crossover(chromosomes_gpu, np.int32(self.ulonglongRequired), islandBestChromosomes_gpu, random_crossover_index_gpu, np.int32(islandSize) ,np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))    
             
+
             ##################################
             # Mutation #
             ##################################

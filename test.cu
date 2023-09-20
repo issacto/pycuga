@@ -75,6 +75,7 @@ __global__ void mutation(unsigned long long int *parents, int ulonglongRequired,
     }
 }
 
+
 __global__ void internalReOrder(unsigned long long int *parents, int ulonglongRequired, unsigned int *parentVals, int islandSize, int max)
 {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
@@ -147,7 +148,7 @@ __global__ void migration(unsigned long long int *parents, int ulonglongRequired
     }
 }
 
-__global__ void selection(unsigned long long int *parents, int ulonglongRequired,  int *parentVals, unsigned long long int *blockBestParent, int islandSize, int max)
+__global__ void selection_elitism(unsigned long long int *parents, int ulonglongRequired,  int *parentVals, unsigned long long int *blockBestParent, int islandSize, int max)
 {
     int id = blockIdx.x * blockDim.x + threadIdx.x;
     if (max > id)
@@ -170,6 +171,39 @@ __global__ void selection(unsigned long long int *parents, int ulonglongRequired
         }
     }
 }
+
+__global__ void selection_roulettewheel(unsigned long long int *parents, int ulonglongRequired,  int *parentVals, unsigned long long int *blockBestParent, float *wheelProbs, int islandSize, int max)
+{
+    int id = blockIdx.x * blockDim.x + threadIdx.x;
+    if (max > id)
+    {
+        int bId = id * islandSize;
+        unsigned int tmpLowestVal = 100000000;
+        unsigned int totalVal = 0;
+        // find the lowest and total fitness value
+        for (int i = 0; i < islandSize; i++)
+        {
+            if (parentVals[bId + i] < tmpLowestVal)
+            {
+                tmpLowestVal = parentVals[bId + i];
+            }
+            totalVal += parentVals[bId + i];
+        }
+        unsigned int base = totalVal - islandSize * tmpLowestVal;
+        // store the cumulative proabability
+        float tmpProb = 0;
+        for (int i = 0; i < islandSize; i++)
+        {
+            tmpProb += (parentVals[bId + i] - tmpLowestVal) / base;
+            if (tmpProb > wheelProbs[id])
+            {
+                // select the chromosome when the probability is higher than the randomly generated probability
+                blockBestParent[id] = parents[bId + i];
+            }
+        }
+    }
+}
+
 
 __global__ void crossover_single(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int islandSize, int max)
 {
