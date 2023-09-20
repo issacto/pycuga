@@ -1,29 +1,4 @@
-import os
 
-
-def read_libraries_manual():
-    return """
-#include <cuda_runtime.h> 
-__constant__ short d_problemSets[30000];
-__constant__ short d_problemSetsSize;
-
-"""
-
-def read_files_as_strings(directory_path):
-    file_string = read_libraries_manual()
-    for dirpath, _, filenames in os.walk(directory_path):
-        for filename in filenames:
-            file_path = os.path.join(dirpath, filename)
-            with open(file_path, 'r') as file:
-                file_string+= file.read()
-            file_string+="\n"
-    return file_string
-
-
-
-def read_files_as_strings_manual():
-
-    return """ 
 #include <cuda_runtime.h> 
 __constant__ short d_problemSets[30000];
 __constant__ short d_problemSetsSize;
@@ -347,4 +322,3 @@ __global__ void crossover_uniform(unsigned long long int *parents, int ulonglong
     }
 }
 
-"""

@@ -8,11 +8,11 @@ Pycuga (PYthon CUda Genetic Algorithm) provides a simple and easy package for pe
 
 ### Parameters
 
-| Methods currently supported |  | |
-| ------------- |:-------------:|:-------------:|
-| Selection     | Elitism, Roulette Wheel | "selection_elitism", "selection_roulettewheel" |
-| Crossover     | Single, Double, Uniform|"crossover_single", "crossover_double","crossover_uniform"|
-| Mutation      | Number     ||
+| Methods currently supported |  | 
+| ------------- |:-------------:|
+| Selection     | Elitism, Roulette Wheel | 
+| Crossover     | Single, Double, Uniform|
+| Mutation      | Number     |
 
 
 
@@ -25,7 +25,7 @@ p1 = PyCUGA( isTime, time , constArr, chromosomeSize, stringPlaceholder,mutation
 p1. launchKernel(islandSize , blockSize , chromosomeNo, migrationRounds,rounds)
 ```
 
-[Samples](https://github.com/issacto/PyCuGa/tree/main/samples) for more information.
+Examples [here](https://github.com/issacto/PyCuGa/tree/main/samples).
 
 
 ### Limitations

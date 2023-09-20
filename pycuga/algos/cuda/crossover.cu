@@ -1,5 +1,5 @@
 
-__global__ void crossover_single(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int islandSize, int max)
+__global__ void crossover_one(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int islandSize, int max)
 {
     int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
     int startingPosition = splitIndex[(blockIdx.x * blockDim.x + threadIdx.x)];
@@ -39,7 +39,7 @@ __global__ void crossover_single(unsigned long long int *parents, int ulonglongR
     }
 }
 
-__global__ void crossover_double(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int *length, int islandSize, int max)
+__global__ void crossover_two(unsigned long long int *parents, int ulonglongRequired, unsigned long long int *blockBestParents, int *splitIndex, int *length, int islandSize, int max)
 {
     int id = (blockIdx.x * blockDim.x + threadIdx.x)*ulonglongRequired;
     int startingPosition = splitIndex[(blockIdx.x * blockDim.x + threadIdx.x)];

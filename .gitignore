@@ -62,5 +62,4 @@ test.py
 
 test.cu
 
-./printCuda.cu
-printCuda.cu
+./pycuga/printPyCuGa.cu

@@ -6,13 +6,11 @@ import pycuda.driver as drv
 import time
 import os
 import sys
-# sys.path.append("./algos")
-# import algos.tools as tools
 import math
 import pycuda.gpuarray as gpuarray
 import pycuda.curandom as curandom
 import os
-# from pycuga.algos.tools import read_files_as_strings, read_files_as_strings_manual, read_libraries_manual
+from pycuga.algos.tools import read_files_as_strings_manual
 
 
 
@@ -34,10 +32,11 @@ class PyCUGA:
 
         # declare global CUDA functions
         
-        # +"/pycuga/algos/cuda/"
-        # libraryCode = read_libraries_manual())
+        cudaCode = read_files_as_strings_manual()
         mod = SourceModule((cudaCode+stringPlaceholder).replace("TO-BE-REPLACED-ulonglongRequired", str(self.ulonglongRequired)))
-        self.crossover = mod.get_function(crossoverMode)
+        self.crossover_one = mod.get_function("crossover_one")
+        self.crossover_two = mod.get_function("crossover_two")
+        self.crossover_uniform = mod.get_function("crossover_uniform")
         self.mutation = mod.get_function("mutation")
         self.selection_elitism = mod.get_function("selection_elitism")
         self.selection_roulettewheel = mod.get_function("selection_roulettewheel")
@@ -119,13 +118,14 @@ class PyCUGA:
 
             if(isDebug):
                 print("selection")
-            if(self.selectionMode=="selection_elitism"):
+            if(self.selectionMode=="elitism"):
                 self.selection_elitism(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, islandBestChromosomes_gpu,  np.int32(islandSize), np.int32(maxIslandThread), block=(blockSize, 1, 1), grid=(islandGridSize, 1))
-            elif(self.selectionMode=="selection_roulettewheel"):
+            elif(self.selectionMode=="roulettewheel"):
                 random_selection_probs_cpu = np.random.rand(maxIslandThread).astype(np.float32)
                 random_selection_probs_gpu = gpuarray.to_gpu(random_selection_probs_cpu)
                 self.selection_roulettewheel(chromosomes_gpu, np.int32(self.ulonglongRequired), chromosomesResults_gpu, islandBestChromosomes_gpu, random_selection_probs_gpu, np.int32(islandSize), np.int32(maxIslandThread), block=(blockSize, 1, 1), grid=(islandGridSize, 1))
-            
+            else:
+                print("NO SELECTION")
 
             ##################################
             # Crossover #
@@ -133,10 +133,15 @@ class PyCUGA:
             if(isDebug):
                 print("crossover")
             
-            if(self.crossoverMode=="crossover_double"):
-                self.crossover(chromosomes_gpu, np.int32(self.ulonglongRequired), islandBestChromosomes_gpu, random_crossover_index_gpu, random_crossover_length_gpu,  np.int32(islandSize) ,np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
+            if(self.crossoverMode=="one"):
+                self.crossover_one(chromosomes_gpu, np.int32(self.ulonglongRequired), islandBestChromosomes_gpu, random_crossover_index_gpu, np.int32(islandSize) ,np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1)) 
+            elif(self.crossoverMode=="two"):
+                self.crossover_two(chromosomes_gpu, np.int32(self.ulonglongRequired), islandBestChromosomes_gpu, random_crossover_index_gpu, random_crossover_length_gpu,  np.int32(islandSize) ,np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))
+            elif(self.crossoverMode=="uniform"):
+                self.crossover_uniform(chromosomes_gpu, np.int32(self.ulonglongRequired), islandBestChromosomes_gpu, random_crossover_index_gpu, np.int32(islandSize) ,np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1)) 
             else:
-                self.crossover(chromosomes_gpu, np.int32(self.ulonglongRequired), islandBestChromosomes_gpu, random_crossover_index_gpu, np.int32(islandSize) ,np.int32(maxChromosomeThread), block=(blockSize, 1, 1), grid=(parentsGridSize, 1))    
+                print("NO CROSSOVER")
+               
             
 
             ##################################
