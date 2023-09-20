@@ -63,3 +63,4 @@ test.py
 test.cu
 
 ./pycuga/printPyCuGa.cu
+pycuga/printPyCuGa.cu
