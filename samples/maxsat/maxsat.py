@@ -1,5 +1,5 @@
-# !pip install pycuga==0.0.11
-# from pycuga import pycuga
+from pycuga.pycuga import PyCUGA
+import numpy as np
 
 stringPlaceholder="""
 

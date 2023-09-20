@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pycuga",
-    version="0.0.11",
+    version="0.0.13",
     author="Issac To",
     description="Python Cuda Genetic Algorithm Package",
     long_description=long_description,

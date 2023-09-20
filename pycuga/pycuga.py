@@ -26,9 +26,7 @@ class PyCUGA:
         self.mutationNumber = mutationNumber
         self.crossoverMode= crossoverMode
         self.selectionMode = selectionMode
-
-        num_devices = cuda.Device.count()
-        print("num_devices", num_devices)
+        # num_devices = cuda.Device.count()
 
         # declare global CUDA functions
         

@@ -1,3 +1,5 @@
+from pycuga.pycuga import PyCUGA
+import numpy as np
 
 stringPlaceholder="""
 
