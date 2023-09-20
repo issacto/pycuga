@@ -20,6 +20,11 @@ Pycuga (PYthon CUda Genetic Algorithm) provides a simple and easy package for pe
 pip install pycuga
 ```
 
+```python
+p1 = PyCUGA( isTime, time , constArr, chromosomeSize, stringPlaceholder,mutationNumber , selectionMode, crossoverMode)
+p1. launchKernel(islandSize , blockSize , chromosomeNo, migrationRounds,rounds)
+```
+
 [Samples](https://github.com/issacto/PyCuGa/tree/main/samples) for more information.
 
 
