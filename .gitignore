@@ -61,3 +61,6 @@ test.py
 ./.vscode/
 
 test.cu
+
+./printCuda.cu
+printCuda.cu
