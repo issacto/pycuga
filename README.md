@@ -11,7 +11,7 @@ Pycuga (PYthon CUda Genetic Algorithm) provides a package for performing island-
 | Methods currently supported |  | 
 | ------------- |:-------------:|
 | Selection     | Elitism, Roulette Wheel | 
-| Crossover     | Single, Double, Uniform|
+| Crossover     | One (point), Two (points), Uniform|
 | Mutation      | Number     |
 
 
