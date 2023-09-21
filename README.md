@@ -21,7 +21,7 @@ pip install pycuga
 ```
 
 ```python
-p1 = PyCUGA( isTime, time , constArr, chromosomeSize, stringPlaceholder,mutationNumber , selectionMode, crossoverMode)
+p1 = PyCUGA( isTime, time, constArr, chromosomeSize, stringPlaceholder, mutationNumber, selectionMode, crossoverMode)
 p1. launchKernel(islandSize , blockSize , chromosomeNo, migrationRounds,rounds)
 ```
 
