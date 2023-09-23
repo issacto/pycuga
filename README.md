@@ -43,7 +43,7 @@ p1. launchKernel(islandSize, blockSize , chromosomeNo, isTime, timeAllowed, migr
 
 Examples [here](https://github.com/issacto/PyCuGa/tree/main/samples).
 
-Colab MaxSat example  [here](https://github.com/issacto/PyCuGa/tree/main/samples).
+Colab [example](https://colab.research.google.com/drive/1D49YgmBiyiJ8zgygs4XXp123ySmc1yNf?usp=sharing).
 
 ### Limitations
 * Use multiples of 32 (for chromosome parameters) to avoid bugs and increase efficiency.
