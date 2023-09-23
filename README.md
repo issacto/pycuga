@@ -22,23 +22,23 @@ pip install pycuga
 ```
 
 ```python
-p1 = PyCUGA( isTime, time, constArr, chromosomeSize, stringPlaceholder, mutationNumber, selectionMode, crossoverMode)
-p1. launchKernel(islandSize , blockSize , chromosomeNo, migrationRounds,rounds)
+p1 = PyCUGA(constArr, chromosomeSize, stringPlaceholder, mutationNumber, selectionMode, crossoverMode)
+p1. launchKernel(islandSize, blockSize , chromosomeNo, isTime, timeAllowed, migrationRounds, rounds)
 ```
 
-- constArr (numpy array):
-- chromosomeSize (int):
-- stringPlaceholder (string):
-- mutationNumber (int):
-- selectionMode (string):
-- crossoverMode (string): "
+- constArr (numpy array): defines the details of the problem
+- chromosomeSize (int): number of variables in a chromosome 
+- stringPlaceholder (string): defines the evalutaion method and other constants
+- mutationNumber (int): /
+- selectionMode (string): "elitism" or "roulettewheel"
+- crossoverMode (string): "one" or "two" or "uniform"
 
 - islandSize (int): size of an island
 - blockSize (int): Cuda block size
 - chromosomeNo (int): number of chromosomes
 - migrationRounds (int): number of rounds per migration
 - isTime (bool): stopped by time or number of rounds
-- time (int): how many seconds allowed
+- timeAllowed (int): seconds allowed
 - rounds (int): total number of rounds
 
 Examples [here](https://github.com/issacto/PyCuGa/tree/main/samples).
