@@ -42,6 +42,7 @@ p1. launchKernel(islandSize , blockSize , chromosomeNo, migrationRounds,rounds)
 - rounds (int): total number of rounds
 
 Examples [here](https://github.com/issacto/PyCuGa/tree/main/samples).
+
 Colab MaxSat example  [here](https://github.com/issacto/PyCuGa/tree/main/samples).
 
 ### Limitations
