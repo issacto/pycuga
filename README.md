@@ -4,7 +4,7 @@ Pycuga (PYthon CUda Genetic Algorithm) provides a package for performing island-
 
 ### Motivation
 - When I worked on my previous project on [Solving Maximum Satisfiability Problem using CUDA](https://github.com/issacto/cuda-maxsat), I realised a lot of code could be reused, which save a lot of development time for solving other optimisation problems using genetic algorithm and CUDA. 
-- Methods for migartion, selection and mutation are implemented already. Users only need to pick the method during initialisstion.
+- Methods for migartion, selection and mutation are implemented already. Users only need to pick the method during initialisation.
 
 ### Parameters
 
@@ -23,6 +23,21 @@ pip install pycuga
 p1 = PyCUGA( isTime, time, constArr, chromosomeSize, stringPlaceholder, mutationNumber, selectionMode, crossoverMode)
 p1. launchKernel(islandSize , blockSize , chromosomeNo, migrationRounds,rounds)
 ```
+
+- isTime:
+- time:
+- constArr:
+- chromosomeSize:
+- stringPlaceholder:
+- mutationNumber:
+- selectionMode:
+- crossoverMode:
+
+- islandSize:
+- blockSize:
+- chromosomeNo:
+- migrationRounds:
+- rounds:
 
 Examples [here](https://github.com/issacto/PyCuGa/tree/main/samples).
 
