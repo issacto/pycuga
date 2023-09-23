@@ -26,20 +26,20 @@ p1 = PyCUGA( isTime, time, constArr, chromosomeSize, stringPlaceholder, mutation
 p1. launchKernel(islandSize , blockSize , chromosomeNo, migrationRounds,rounds)
 ```
 
-- isTime:
-- time:
-- constArr:
-- chromosomeSize:
-- stringPlaceholder:
-- mutationNumber:
-- selectionMode:
-- crossoverMode:
+- constArr (numpy array):
+- chromosomeSize (int):
+- stringPlaceholder (string):
+- mutationNumber (int):
+- selectionMode (string):
+- crossoverMode (string): "
 
-- islandSize:
-- blockSize:
-- chromosomeNo:
-- migrationRounds:
-- rounds:
+- islandSize (int): size of an island
+- blockSize (int): Cuda block size
+- chromosomeNo (int): number of chromosomes
+- migrationRounds (int): number of rounds per migration
+- isTime (bool): stopped by time or number of rounds
+- time (int): how many seconds allowed
+- rounds (int): total number of rounds
 
 Examples [here](https://github.com/issacto/PyCuGa/tree/main/samples).
 
