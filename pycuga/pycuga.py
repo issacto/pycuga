@@ -10,15 +10,15 @@ import math
 import pycuda.gpuarray as gpuarray
 import pycuda.curandom as curandom
 import os
+import time
 from pycuga.algos.tools import read_files_as_strings_manual
 
 
 
 
+
 class PyCUGA:
-    def __init__(self, isTime, time, constArr, chromosomeSize, stringPlaceholder, mutationNumber, selectionMode, crossoverMode):
-        self.isTime = isTime
-        self.time = time
+    def __init__(self, constArr, chromosomeSize, stringPlaceholder, mutationNumber, selectionMode, crossoverMode):
         self.dev = drv.Device(0)
         self.ctx = self.dev.make_context()
         self.ulonglongRequired = math.ceil(chromosomeSize/64)
@@ -45,7 +45,8 @@ class PyCUGA:
         self.constantArray = gpuarray.to_gpu(constArr)
         self.constantArraySize = self.constantArray.size
 
-    def launchKernel(self, islandSize, blockSize, chromosomeNo, migrationRounds, rounds, isDebug = False):
+    def launchKernel(self, islandSize, blockSize, chromosomeNo, migrationRounds, isTime, timeAllowed, rounds, isDebug = False):
+        timeStart = time.time()
         parentsGridSize = int((chromosomeNo+blockSize-1)//blockSize)
         islandGridSize = int((chromosomeNo/islandSize+blockSize-1)//blockSize)
         maxChromosomeThread = chromosomeNo*self.ulonglongRequired
@@ -75,8 +76,9 @@ class PyCUGA:
         roundCount = 0
         maxVal = 0
         maxChromosome =""
+        isTimeContinue=True
 
-        while (self.isTime) or (not self.isTime and roundCount<rounds):
+        while (isTime) or (not isTime and roundCount<rounds):
             print("Round - ", roundCount, maxVal, maxChromosome)
             ##################################
             # Migration #
@@ -184,6 +186,9 @@ class PyCUGA:
             ##################################
             ##################################
 
+            if(isTime and (time.time()-timeStart)>timeAllowed):
+                break
+            
             ##################################
             # Print Maximum #
             ##################################
